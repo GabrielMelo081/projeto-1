@@ -1,0 +1,128 @@
+import java.util.*;
+
+public class Main {
+
+    // Função de BFS
+    public static void bfs(Map<String, List<String>> grafo, String inicio) {
+        Queue<String> fila = new LinkedList<>();
+        Set<String> visitados = new HashSet<>();
+
+        fila.add(inicio);
+        visitados.add(inicio);
+
+        System.out.println("Iniciando BFS a partir de: " + inicio);
+
+        while (!fila.isEmpty()) {
+            String atual = fila.poll();
+            System.out.println("Visitando: " + atual);
+
+            for (String vizinho : grafo.get(atual)) {
+                if (!visitados.contains(vizinho)) {
+                    fila.add(vizinho);
+                    visitados.add(vizinho);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        // Criando "mapa" de Recife (exemplo simples)
+        Map<String, List<String>> recifeMap = new HashMap<>();
+
+        recifeMap.put("Boa Viagem", Arrays.asList("Pina", "Recife Antigo"));
+        recifeMap.put("Pina", Arrays.asList("Boa Viagem", "Derby"));
+        recifeMap.put("Derby", Arrays.asList("Pina", "Casa Forte"));
+        recifeMap.put("Casa Forte", Arrays.asList("Derby"));
+        recifeMap.put("Recife Antigo", Arrays.asList("Boa Viagem"));
+
+        // Rodando BFS começando em Boa Viagem
+        bfs(recifeMap, "Boa Viagem");
+    }
+}
+
+// Segunda parte do codigo
+
+import java.util.*;
+
+public class Main2 {
+
+    static class Aresta {
+        String destino;
+        double peso; // distância em metros ou tempo
+
+        Aresta(String destino, double peso) {
+            this.destino = destino;
+            this.peso = peso;
+        }
+    }
+
+    public static Map<String, Double> dijkstra(
+            Map<String, List<Aresta>> grafo,
+            String origem
+    ) {
+        Map<String, Double> distancia = new HashMap<>();
+        PriorityQueue<String> fila = new PriorityQueue<>(
+                Comparator.comparingDouble(distancia::get)
+        );
+
+        // Inicializar distâncias
+        for (String no : grafo.keySet()) {
+            distancia.put(no, Double.MAX_VALUE);
+        }
+        distancia.put(origem, 0.0);
+
+        fila.add(origem);
+
+        while (!fila.isEmpty()) {
+            String atual = fila.poll();
+
+            for (Aresta aresta : grafo.get(atual)) {
+                double novaDist = distancia.get(atual) + aresta.peso;
+
+                if (novaDist < distancia.get(aresta.destino)) {
+                    distancia.put(aresta.destino, novaDist);
+                    fila.add(aresta.destino);
+                }
+            }
+        }
+
+        return distancia;
+    }
+
+    public static void main(String[] args) {
+
+        // Grafo fictício de Recife (subconjunto simbólico)
+        Map<String, List<Aresta>> recife = new HashMap<>();
+
+        recife.put("Boa Viagem", Arrays.asList(
+                new Aresta("Pina", 2500),
+                new Aresta("Recife Antigo", 5600)
+        ));
+
+        recife.put("Pina", Arrays.asList(
+                new Aresta("Boa Viagem", 2500),
+                new Aresta("Derby", 3100)
+        ));
+
+        recife.put("Derby", Arrays.asList(
+                new Aresta("Pina", 3100),
+                new Aresta("Casa Forte", 4800)
+        ));
+
+        recife.put("Casa Forte", Arrays.asList(
+                new Aresta("Derby", 4800)
+        ));
+
+        recife.put("Recife Antigo", Arrays.asList(
+                new Aresta("Boa Viagem", 5600)
+        ));
+
+        Map<String, Double> resultado = dijkstra(recife, "Boa Viagem");
+
+        System.out.println("\nDistâncias mínimas a partir de Boa Viagem:");
+        resultado.forEach((local, dist) ->
+                System.out.println(local + " = " + dist + " metros")
+        );
+    }
+}
